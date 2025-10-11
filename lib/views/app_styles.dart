@@ -8,3 +8,8 @@ const heading1 = TextStyle(
   fontSize: 24,
   fontWeight: FontWeight.bold,
 );
+
+const TextStyle heading2 = TextStyle(
+  fontSize: 20,
+  fontWeight: FontWeight.bold,
+);
