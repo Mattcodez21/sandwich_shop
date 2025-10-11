@@ -37,23 +37,26 @@ void main() {
     expect(find.text('six-inch'), findsOneWidget);
 
     // Find the Switch widget and verify it's initially on (footlong)
-    final switchWidget = tester.widget<Switch>(find.byType(Switch));
+    final switchWidget =
+        tester.widget<Switch>(find.byKey(const Key('sandwich_size_switch')));
     expect(switchWidget.value, isTrue);
 
     // Tap the switch to toggle it off (six-inch)
-    await tester.tap(find.byType(Switch));
+    await tester.tap(find.byKey(const Key('sandwich_size_switch')));
     await tester.pump();
 
     // Verify the switch toggled to false (six-inch)
-    final switchWidgetAfterTap = tester.widget<Switch>(find.byType(Switch));
+    final switchWidgetAfterTap =
+        tester.widget<Switch>(find.byKey(const Key('sandwich_size_switch')));
     expect(switchWidgetAfterTap.value, isFalse);
 
     // Tap again to toggle back to footlong
-    await tester.tap(find.byType(Switch));
+    await tester.tap(find.byKey(const Key('sandwich_size_switch')));
     await tester.pump();
 
     // Verify it toggled back to true (footlong)
-    final switchWidgetFinal = tester.widget<Switch>(find.byType(Switch));
+    final switchWidgetFinal =
+        tester.widget<Switch>(find.byKey(const Key('sandwich_size_type')));
     expect(switchWidgetFinal.value, isTrue);
   });
 }
