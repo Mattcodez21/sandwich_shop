@@ -30,33 +30,36 @@ void main() {
   testWidgets('Switch toggles between six-inch and footlong',
       (WidgetTester tester) async {
     // Build the app
-    await tester.pumpWidget(const App() as Widget);
+    await tester.pumpWidget(const App());
 
-    // Verify initial state - switch should start as footlong (true)
+    // Verify initial state
     expect(find.text('footlong'), findsOneWidget);
     expect(find.text('six-inch'), findsOneWidget);
 
-    // Find the Switch widget and verify it's initially on (footlong)
-    final switchWidget =
-        tester.widget<Switch>(find.byKey(const Key('sandwich_size_switch')));
+    // Find the sandwich size switch using the key
+    final sandwichSwitch = find.byKey(const Key('sandwich_size_switch'));
+
+    // Verify we can find it
+    expect(sandwichSwitch, findsOneWidget);
+
+    // Get the widget and verify it's initially on (footlong)
+    Switch switchWidget = tester.widget<Switch>(sandwichSwitch);
     expect(switchWidget.value, isTrue);
 
-    // Tap the switch to toggle it off (six-inch)
-    await tester.tap(find.byKey(const Key('sandwich_size_switch')));
+    // Tap the switch to toggle it
+    await tester.tap(sandwichSwitch);
     await tester.pump();
 
-    // Verify the switch toggled to false (six-inch)
-    final switchWidgetAfterTap =
-        tester.widget<Switch>(find.byKey(const Key('sandwich_size_switch')));
-    expect(switchWidgetAfterTap.value, isFalse);
+    // Verify it toggled to false
+    switchWidget = tester.widget<Switch>(sandwichSwitch);
+    expect(switchWidget.value, isFalse);
 
-    // Tap again to toggle back to footlong
-    await tester.tap(find.byKey(const Key('sandwich_size_switch')));
+    // Tap again to toggle back
+    await tester.tap(sandwichSwitch);
     await tester.pump();
 
-    // Verify it toggled back to true (footlong)
-    final switchWidgetFinal =
-        tester.widget<Switch>(find.byKey(const Key('sandwich_size_type')));
-    expect(switchWidgetFinal.value, isTrue);
+    // Verify it toggled back to true
+    switchWidget = tester.widget<Switch>(sandwichSwitch);
+    expect(switchWidget.value, isTrue);
   });
 }
