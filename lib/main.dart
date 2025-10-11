@@ -30,6 +30,7 @@ class OrderScreen extends StatefulWidget {
 
 class _OrderScreenState extends State<OrderScreen> {
   int _quantity = 0;
+  bool _isFootlong = true;
 
   void _increaseQuantity() {
     if (_quantity < widget.maxQuantity) {
@@ -45,6 +46,8 @@ class _OrderScreenState extends State<OrderScreen> {
 
   @override
   Widget build(BuildContext context) {
+    String sandwichSize = _isFootlong ? 'Footlong' : 'Six-inch';
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Sandwich Counter'),
@@ -55,7 +58,22 @@ class _OrderScreenState extends State<OrderScreen> {
           children: <Widget>[
             OrderItemDisplay(
               _quantity,
-              'Footlong',
+              sandwichSize,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text('Six-inch'),
+                Switch(
+                  value: _isFootlong,
+                  onChanged: (value) {
+                    setState(() {
+                      _isFootlong = value;
+                    });
+                  },
+                ),
+                const Text('Footlong'),
+              ],
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
