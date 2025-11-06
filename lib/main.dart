@@ -148,6 +148,7 @@ class _OrderScreenState extends State<OrderScreen> {
               onSelected: _onBreadTypeSelected,
               dropdownMenuEntries: _buildDropdownEntries(),
             ),
+            const SizedBox(height: 10),
             SwitchRow(
               leftLabel: 'untoasted',
               rightLabel: 'toasted',
