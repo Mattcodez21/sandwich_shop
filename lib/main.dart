@@ -148,19 +148,12 @@ class _OrderScreenState extends State<OrderScreen> {
               onSelected: _onBreadTypeSelected,
               dropdownMenuEntries: _buildDropdownEntries(),
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text('untoasted', style: normalText),
-                Switch(
-                  key: const Key('toasted_switch'),
-                  value: _isToasted,
-                  onChanged: (value) {
-                    setState(() => _isToasted = value);
-                  },
-                ),
-                const Text('toasted', style: normalText),
-              ],
+            SwitchRow(
+              leftLabel: 'untoasted',
+              rightLabel: 'toasted',
+              value: _isToasted,
+              onChanged: (value) => setState(() => _isToasted = value),
+              switchKey: const Key('toasted_switch'),
             ),
             const SizedBox(height: 20),
             Padding(
