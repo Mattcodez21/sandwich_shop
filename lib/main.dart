@@ -274,3 +274,36 @@ class OrderItemDisplay extends StatelessWidget {
     );
   }
 }
+
+class SwitchRow extends StatelessWidget {
+  final String leftLabel;
+  final String rightLabel;
+  final bool value;
+  final ValueChanged<bool> onChanged;
+  final Key? switchKey;
+
+  const SwitchRow({
+    super.key,
+    required this.leftLabel,
+    required this.rightLabel,
+    required this.value,
+    required this.onChanged,
+    this.switchKey,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(leftLabel, style: normalText),
+        Switch(
+          key: switchKey,
+          value: value,
+          onChanged: onChanged,
+        ),
+        Text(rightLabel, style: normalText),
+      ],
+    );
+  }
+}
