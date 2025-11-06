@@ -134,17 +134,12 @@ class _OrderScreenState extends State<OrderScreen> {
               style: heading2,
             ),
             const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text('six-inch', style: normalText),
-                Switch(
-                  key: const Key('sandwich_size_switch'),
-                  value: _isFootlong,
-                  onChanged: _onSandwichTypeChanged,
-                ),
-                const Text('footlong', style: normalText),
-              ],
+            SwitchRow(
+              leftLabel: 'six-inch',
+              rightLabel: 'footlong',
+              value: _isFootlong,
+              onChanged: _onSandwichTypeChanged,
+              switchKey: const Key('sandwich_size_switch'),
             ),
             const SizedBox(height: 10),
             DropdownMenu<BreadType>(
