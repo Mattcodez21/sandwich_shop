@@ -37,6 +37,14 @@ class _CartScreenState extends State<CartScreen> {
     );
   }
 
+  double _calculateTotalPrice() {
+    double total = 0.0;
+    for (final entry in widget.cart.items.entries) {
+      total += _getItemPrice(entry.key, entry.value);
+    }
+    return total;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -67,15 +75,46 @@ class _CartScreenState extends State<CartScreen> {
                       '${_getSizeText(entry.key.isFootlong)} on ${entry.key.breadType.name} bread',
                       style: normalText,
                     ),
-                    Text(
-                      'Qty: ${entry.value} - £${_getItemPrice(entry.key, entry.value).toStringAsFixed(2)}',
-                      style: normalText,
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.remove),
+                          onPressed: () {
+                            setState(() {
+                              final current = widget.cart.items[entry.key] ?? 1;
+                              final next = (current - 1).clamp(1, 999);
+                              widget.cart.items[entry.key] = next;
+                            });
+                          },
+                        ),
+                        Text(
+                          '${entry.value}',
+                          style: normalText,
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.add),
+                          onPressed: () {
+                            setState(() {
+                              final current = widget.cart.items[entry.key] ?? 0;
+                              widget.cart.items[entry.key] =
+                                  (current + 1).clamp(1, 999);
+                            });
+                          },
+                        ),
+                        const SizedBox(width: 16),
+                        Text(
+                          '- £${_getItemPrice(entry.key, entry.value).toStringAsFixed(2)}',
+                          style: normalText,
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 20),
                   ],
                 ),
               Text(
-                'Total: £${widget.cart.totalPrice.toStringAsFixed(2)}',
+                'Total: £${_calculateTotalPrice().toStringAsFixed(2)}',
                 style: heading2,
                 textAlign: TextAlign.center,
               ),
