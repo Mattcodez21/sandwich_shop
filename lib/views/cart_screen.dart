@@ -21,6 +21,18 @@ class _CartScreenState extends State<CartScreen> {
     Navigator.pop(context);
   }
 
+  void _showFeedback(String message) {
+    // clear any existing snackbars and show a short floating one
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(milliseconds: 1400),
+      ),
+    );
+  }
+
   String _getSizeText(bool isFootlong) {
     if (isFootlong) {
       return 'Footlong';
@@ -122,17 +134,10 @@ class _CartScreenState extends State<CartScreen> {
                                   });
                                   final after = widget.cart.items[sandwich];
                                   if (after == null) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                          content:
-                                              Text('$name removed from cart')),
-                                    );
+                                    _showFeedback('$name removed from cart');
                                   } else {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                          content: Text(
-                                              'Updated $name quantity: $after')),
-                                    );
+                                    _showFeedback(
+                                        'Updated $name quantity: $after');
                                   }
                                 },
                               ),
@@ -152,11 +157,8 @@ class _CartScreenState extends State<CartScreen> {
                                   });
                                   final updated =
                                       widget.cart.items[sandwich] ?? 0;
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                        content: Text(
-                                            'Updated $name quantity: $updated')),
-                                  );
+                                  _showFeedback(
+                                      'Updated $name quantity: $updated');
                                 },
                               ),
                               const SizedBox(width: 8),
@@ -167,11 +169,7 @@ class _CartScreenState extends State<CartScreen> {
                                   setState(() {
                                     widget.cart.items.remove(sandwich);
                                   });
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                        content:
-                                            Text('$name removed from cart')),
-                                  );
+                                  _showFeedback('$name removed from cart');
                                 },
                               ),
                               const SizedBox(width: 16),
