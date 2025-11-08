@@ -61,5 +61,56 @@ void main() {
     // Verify it toggled back to true
     switchWidget = tester.widget<Switch>(sandwichSwitch);
     expect(switchWidget.value, isTrue);
+
+    group('Cart Summary Tests', () {
+      testWidgets('Cart summary shows correct initial values',
+          (WidgetTester tester) async {
+        await tester.pumpWidget(const App());
+
+        expect(find.text('Items: 0'), findsOneWidget);
+        expect(find.text('Total: £0.00'), findsOneWidget);
+      });
+
+      testWidgets('Cart summary updates when item is added',
+          (WidgetTester tester) async {
+        await tester.pumpWidget(const App());
+
+        final addButton = find.widgetWithText(ElevatedButton, 'Add to Cart');
+        await tester.tap(addButton);
+        await tester.pump();
+
+        expect(find.text('Items: 1'), findsOneWidget);
+        expect(find.text('Total: £11.00'), findsOneWidget);
+      });
+
+      testWidgets('Cart summary updates with multiple items',
+          (WidgetTester tester) async {
+        await tester.pumpWidget(const App());
+
+        final increaseButton = find.byIcon(Icons.add);
+        await tester.tap(increaseButton);
+        await tester.pump();
+
+        final addButton = find.widgetWithText(ElevatedButton, 'Add to Cart');
+        await tester.tap(addButton);
+        await tester.pump();
+
+        expect(find.text('Items: 2'), findsOneWidget);
+        expect(find.text('Total: £22.00'), findsOneWidget);
+      });
+
+      testWidgets('SnackBar appears when item added',
+          (WidgetTester tester) async {
+        await tester.pumpWidget(const App());
+
+        final addButton = find.widgetWithText(ElevatedButton, 'Add to Cart');
+        await tester.tap(addButton);
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 100));
+
+        expect(find.byType(SnackBar), findsOneWidget);
+        expect(find.textContaining('Added'), findsOneWidget);
+      });
+    });
   });
 }
