@@ -67,6 +67,24 @@ class _CartScreenState extends State<CartScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 20),
+              // show a clear empty-cart message if there are no items
+              if (widget.cart.items.isEmpty) ...[
+                const Icon(Icons.shopping_cart_outlined,
+                    size: 72, color: Colors.grey),
+                const SizedBox(height: 12),
+                const Text(
+                  'Your cart is empty',
+                  style: heading2,
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Add items from the Order screen to get started.',
+                  style: normalText,
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 20),
+              ],
               // iterate over a snapshot to allow removing items safely
               for (MapEntry<Sandwich, int> entry
                   in widget.cart.items.entries.toList())
