@@ -84,15 +84,30 @@ class _CartScreenState extends State<CartScreen> {
                         IconButton(
                           icon: const Icon(Icons.remove),
                           onPressed: () {
+                            final sandwich = entry.key;
+                            final name = sandwich.name;
                             setState(() {
-                              final current = widget.cart.items[entry.key] ?? 1;
+                              final current = widget.cart.items[sandwich] ?? 1;
                               final next = current - 1;
                               if (next < 1) {
-                                widget.cart.items.remove(entry.key);
+                                widget.cart.items.remove(sandwich);
                               } else {
-                                widget.cart.items[entry.key] = next;
+                                widget.cart.items[sandwich] = next;
                               }
                             });
+                            final currentAfter = widget.cart.items[sandwich];
+                            if (currentAfter == null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                    content: Text('$name removed from cart')),
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                    content: Text(
+                                        'Updated $name quantity: $currentAfter')),
+                              );
+                            }
                           },
                         ),
                         Text(
@@ -102,11 +117,35 @@ class _CartScreenState extends State<CartScreen> {
                         IconButton(
                           icon: const Icon(Icons.add),
                           onPressed: () {
+                            final sandwich = entry.key;
+                            final name = sandwich.name;
                             setState(() {
-                              final current = widget.cart.items[entry.key] ?? 0;
-                              widget.cart.items[entry.key] =
+                              final current = widget.cart.items[sandwich] ?? 0;
+                              widget.cart.items[sandwich] =
                                   (current + 1).clamp(1, 999);
                             });
+                            final updated = widget.cart.items[sandwich] ?? 0;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                  content:
+                                      Text('Updated $name quantity: $updated')),
+                            );
+                          },
+                        ),
+                        const SizedBox(width: 8),
+                        // explicit remove button
+                        IconButton(
+                          icon: const Icon(Icons.delete),
+                          onPressed: () {
+                            final sandwich = entry.key;
+                            final name = sandwich.name;
+                            setState(() {
+                              widget.cart.items.remove(sandwich);
+                            });
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                  content: Text('$name removed from cart')),
+                            );
                           },
                         ),
                         const SizedBox(width: 16),
