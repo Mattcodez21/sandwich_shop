@@ -67,7 +67,9 @@ class _CartScreenState extends State<CartScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 20),
-              for (MapEntry<Sandwich, int> entry in widget.cart.items.entries)
+              // iterate over a snapshot to allow removing items safely
+              for (MapEntry<Sandwich, int> entry
+                  in widget.cart.items.entries.toList())
                 Column(
                   children: [
                     Text(entry.key.name, style: heading2),
@@ -84,8 +86,12 @@ class _CartScreenState extends State<CartScreen> {
                           onPressed: () {
                             setState(() {
                               final current = widget.cart.items[entry.key] ?? 1;
-                              final next = (current - 1).clamp(1, 999);
-                              widget.cart.items[entry.key] = next;
+                              final next = current - 1;
+                              if (next < 1) {
+                                widget.cart.items.remove(entry.key);
+                              } else {
+                                widget.cart.items[entry.key] = next;
+                              }
                             });
                           },
                         ),
