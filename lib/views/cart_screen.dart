@@ -72,90 +72,101 @@ class _CartScreenState extends State<CartScreen> {
                   in widget.cart.items.entries.toList())
                 Column(
                   children: [
-                    Text(entry.key.name, style: heading2),
-                    Text(
-                      '${_getSizeText(entry.key.isFootlong)} on ${entry.key.breadType.name} bread',
-                      style: normalText,
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.remove),
-                          onPressed: () {
-                            final sandwich = entry.key;
-                            final name = sandwich.name;
-                            setState(() {
-                              final current = widget.cart.items[sandwich] ?? 1;
-                              final next = current - 1;
-                              if (next < 1) {
-                                widget.cart.items.remove(sandwich);
-                              } else {
-                                widget.cart.items[sandwich] = next;
-                              }
-                            });
-                            final currentAfter = widget.cart.items[sandwich];
-                            if (currentAfter == null) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                    content: Text('$name removed from cart')),
-                              );
-                            } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                    content: Text(
-                                        'Updated $name quantity: $currentAfter')),
-                              );
-                            }
-                          },
-                        ),
-                        Text(
-                          '${entry.value}',
-                          style: normalText,
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.add),
-                          onPressed: () {
-                            final sandwich = entry.key;
-                            final name = sandwich.name;
-                            setState(() {
-                              final current = widget.cart.items[sandwich] ?? 0;
-                              widget.cart.items[sandwich] =
-                                  (current + 1).clamp(1, 999);
-                            });
-                            final updated = widget.cart.items[sandwich] ?? 0;
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                  content:
-                                      Text('Updated $name quantity: $updated')),
-                            );
-                          },
-                        ),
-                        const SizedBox(width: 8),
-                        // explicit remove button
-                        IconButton(
-                          icon: const Icon(Icons.delete),
-                          onPressed: () {
-                            final sandwich = entry.key;
-                            final name = sandwich.name;
-                            setState(() {
-                              widget.cart.items.remove(sandwich);
-                            });
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                  content: Text('$name removed from cart')),
-                            );
-                          },
-                        ),
-                        const SizedBox(width: 16),
-                        Text(
-                          '- £${_getItemPrice(entry.key, entry.value).toStringAsFixed(2)}',
-                          style: normalText,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
+                    // capture the sandwich and fetch the current quantity from the map
+                    Builder(builder: (context) {
+                      final sandwich = entry.key;
+                      final name = sandwich.name;
+                      final currentQty = widget.cart.items[sandwich] ?? 0;
+                      final itemPrice = _getItemPrice(sandwich, currentQty);
+                      return Column(
+                        children: [
+                          Text(sandwich.name, style: heading2),
+                          Text(
+                            '${_getSizeText(sandwich.isFootlong)} on ${sandwich.breadType.name} bread',
+                            style: normalText,
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.remove),
+                                onPressed: () {
+                                  setState(() {
+                                    final current =
+                                        widget.cart.items[sandwich] ?? 1;
+                                    final next = current - 1;
+                                    if (next < 1) {
+                                      widget.cart.items.remove(sandwich);
+                                    } else {
+                                      widget.cart.items[sandwich] = next;
+                                    }
+                                  });
+                                  final after = widget.cart.items[sandwich];
+                                  if (after == null) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                          content:
+                                              Text('$name removed from cart')),
+                                    );
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                          content: Text(
+                                              'Updated $name quantity: $after')),
+                                    );
+                                  }
+                                },
+                              ),
+                              // read fresh quantity from the map so UI is always current
+                              Text(
+                                '${widget.cart.items[sandwich] ?? 0}',
+                                style: normalText,
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.add),
+                                onPressed: () {
+                                  setState(() {
+                                    final current =
+                                        widget.cart.items[sandwich] ?? 0;
+                                    widget.cart.items[sandwich] =
+                                        (current + 1).clamp(1, 999);
+                                  });
+                                  final updated =
+                                      widget.cart.items[sandwich] ?? 0;
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                        content: Text(
+                                            'Updated $name quantity: $updated')),
+                                  );
+                                },
+                              ),
+                              const SizedBox(width: 8),
+                              // explicit remove button
+                              IconButton(
+                                icon: const Icon(Icons.delete),
+                                onPressed: () {
+                                  setState(() {
+                                    widget.cart.items.remove(sandwich);
+                                  });
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                        content:
+                                            Text('$name removed from cart')),
+                                  );
+                                },
+                              ),
+                              const SizedBox(width: 16),
+                              Text(
+                                '- £${itemPrice.toStringAsFixed(2)}',
+                                style: normalText,
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 20),
+                        ],
+                      );
+                    }),
                   ],
                 ),
               Text(
