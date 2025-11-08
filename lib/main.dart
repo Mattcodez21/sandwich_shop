@@ -256,6 +256,33 @@ class _OrderScreenState extends State<OrderScreen> {
                 backgroundColor: Colors.green,
               ),
               const SizedBox(height: 20),
+              Container(
+                padding: const EdgeInsets.all(16),
+                margin: const EdgeInsets.symmetric(horizontal: 16),
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.blue.shade200),
+                ),
+                child: Column(
+                  children: [
+                    const Text(
+                      'Cart Summary',
+                      style: heading2,
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      'Items: ${_cart.countOfItems}',
+                      style: normalText,
+                    ),
+                    Text(
+                      'Total: £${_cart.totalPrice.toStringAsFixed(2)}',
+                      style: normalText,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
             ],
           ),
         ),
