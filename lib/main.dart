@@ -188,10 +188,12 @@ class _OrderScreenState extends State<OrderScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               SizedBox(
-                height: 300,
+                height: 350,
+                width: double.infinity,
                 child: Image.asset(
                   _getCurrentImagePath(),
-                  fit: BoxFit.contain,
+                  fit: BoxFit.cover,
+                  width: double.infinity,
                   errorBuilder: (context, error, stackTrace) {
                     return const Center(
                       child: Text(
