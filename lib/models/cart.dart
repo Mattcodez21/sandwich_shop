@@ -7,12 +7,23 @@ class Cart {
   // Returns a read-only copy of the items and their quantities
   Map<Sandwich, int> get items => Map.unmodifiable(_items);
 
-  void add(Sandwich sandwich, {int quantity = 1}) {
-    if (_items.containsKey(sandwich)) {
-      _items[sandwich] = _items[sandwich]! + quantity;
+  // Set the quantity for a sandwich (adds if not present). If quantity <= 0 the item is removed.
+  void setQuantity(Sandwich sandwich, int quantity) {
+    if (quantity <= 0) {
+      _items.remove(sandwich);
     } else {
       _items[sandwich] = quantity;
     }
+  }
+
+  // Convenience: remove an item entirely
+  void removeItem(Sandwich sandwich) {
+    _items.remove(sandwich);
+  }
+
+  void add(Sandwich sandwich, {int quantity = 1}) {
+    final current = _items[sandwich] ?? 0;
+    _items[sandwich] = current + quantity;
   }
 
   void remove(Sandwich sandwich, {int quantity = 1}) {

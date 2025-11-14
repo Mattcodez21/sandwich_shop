@@ -50,38 +50,56 @@ void main() {
     await tester.tap(find.byIcon(Icons.add).first);
     await tester.pump(); // rebuild
     await tester.pump(const Duration(milliseconds: 1600)); // allow snackbar
+
+    // SnackBar should be shown and contain update text
     expect(find.byType(SnackBar), findsOneWidget);
+    expect(
+      find.byWidgetPredicate((w) =>
+          w is Text &&
+          w.data != null &&
+          w.data!.contains('Updated ${sandwich.name} quantity: 3')),
+      findsWidgets,
+    );
 
     final String totalFor3 = repo
         .calculatePrice(quantity: 3, isFootlong: sandwich.isFootlong)
         .toStringAsFixed(2);
     expect(find.text('Total: £$totalFor3'), findsOneWidget);
 
-    // Tap - twice to remove (3 -> 2 -> 1), then once more to remove item
+    // Tap - (decrement) to 2
     await tester.tap(find.byIcon(Icons.remove).first);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 1600)); // snackbar
-    expect(find.byType(SnackBar), findsOneWidget);
-
-    // After one remove, total should be for 2 again
+    expect(
+      find.byWidgetPredicate((w) =>
+          w is Text &&
+          w.data != null &&
+          w.data!.contains('Updated ${sandwich.name} quantity')),
+      findsWidgets,
+    );
     expect(find.text('Total: £$totalFor2'), findsOneWidget);
 
-    // Remove twice more to drop below 1 and cause removal:
+    // Decrement to 1
     await tester.tap(find.byIcon(Icons.remove).first);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 1600));
-    // Now quantity should be 1
     expect(find.text('1'), findsOneWidget);
 
-    // Tap remove once more to delete the item (or use delete icon)
+    // Use delete icon to remove the item
     await tester.tap(find.byIcon(Icons.delete).first);
     await tester.pump();
     await tester
         .pump(const Duration(milliseconds: 1600)); // snackbar for delete
 
-    // After removal, empty state should be shown and total £0.00
+    // After removal, empty state should be shown and total £0.00 and snackbar present
     expect(find.text('Your cart is empty'), findsOneWidget);
     expect(find.text('Total: £0.00'), findsOneWidget);
-    expect(find.byType(SnackBar), findsOneWidget);
+    expect(
+      find.byWidgetPredicate((w) =>
+          w is Text &&
+          w.data != null &&
+          w.data!.contains('${sandwich.name} removed from cart')),
+      findsWidgets,
+    );
   });
 }

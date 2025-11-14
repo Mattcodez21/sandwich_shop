@@ -127,9 +127,9 @@ class _CartScreenState extends State<CartScreen> {
                                         widget.cart.items[sandwich] ?? 1;
                                     final next = current - 1;
                                     if (next < 1) {
-                                      widget.cart.items.remove(sandwich);
+                                      widget.cart.removeItem(sandwich);
                                     } else {
-                                      widget.cart.items[sandwich] = next;
+                                      widget.cart.setQuantity(sandwich, next);
                                     }
                                   });
                                   final after = widget.cart.items[sandwich];
@@ -152,8 +152,8 @@ class _CartScreenState extends State<CartScreen> {
                                   setState(() {
                                     final current =
                                         widget.cart.items[sandwich] ?? 0;
-                                    widget.cart.items[sandwich] =
-                                        (current + 1).clamp(1, 999);
+                                    final next = (current + 1).clamp(1, 999);
+                                    widget.cart.setQuantity(sandwich, next);
                                   });
                                   final updated =
                                       widget.cart.items[sandwich] ?? 0;
@@ -167,7 +167,7 @@ class _CartScreenState extends State<CartScreen> {
                                 icon: const Icon(Icons.delete),
                                 onPressed: () {
                                   setState(() {
-                                    widget.cart.items.remove(sandwich);
+                                    widget.cart.removeItem(sandwich);
                                   });
                                   _showFeedback('$name removed from cart');
                                 },
