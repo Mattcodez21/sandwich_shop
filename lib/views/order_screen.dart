@@ -232,6 +232,18 @@ class _OrderScreenState extends State<OrderScreen> {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 20),
+              TextButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, '/profile');
+                },
+                child: const Text(
+                  'Manage Profile',
+                  style: TextStyle(
+                    color: Colors.blue,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
+              ),
             ],
           ),
         ),
