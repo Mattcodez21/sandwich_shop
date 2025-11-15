@@ -1,29 +1,19 @@
+import 'package:flutter/foundation.dart';
 import 'sandwich.dart';
 import 'package:sandwich_shop/repositories/pricing_repository.dart';
 
-class Cart {
+class Cart extends ChangeNotifier {
   final Map<Sandwich, int> _items = {};
 
-  // Returns a read-only copy of the items and their quantities
   Map<Sandwich, int> get items => Map.unmodifiable(_items);
 
-  // Set the quantity for a sandwich (adds if not present). If quantity <= 0 the item is removed.
-  void setQuantity(Sandwich sandwich, int quantity) {
-    if (quantity <= 0) {
-      _items.remove(sandwich);
+  void add(Sandwich sandwich, {int quantity = 1}) {
+    if (_items.containsKey(sandwich)) {
+      _items[sandwich] = _items[sandwich]! + quantity;
     } else {
       _items[sandwich] = quantity;
     }
-  }
-
-  // Convenience: remove an item entirely
-  void removeItem(Sandwich sandwich) {
-    _items.remove(sandwich);
-  }
-
-  void add(Sandwich sandwich, {int quantity = 1}) {
-    final current = _items[sandwich] ?? 0;
-    _items[sandwich] = current + quantity;
+    notifyListeners();
   }
 
   void remove(Sandwich sandwich, {int quantity = 1}) {
@@ -34,16 +24,19 @@ class Cart {
       } else {
         _items.remove(sandwich);
       }
+      notifyListeners();
     }
   }
 
   void clear() {
     _items.clear();
+    notifyListeners();
   }
 
   double get totalPrice {
     final pricingRepository = PricingRepository();
     double total = 0.0;
+
     for (Sandwich sandwich in _items.keys) {
       int quantity = _items[sandwich]!;
       total += pricingRepository.calculatePrice(
@@ -51,6 +44,7 @@ class Cart {
         isFootlong: sandwich.isFootlong,
       );
     }
+
     return total;
   }
 
@@ -60,8 +54,8 @@ class Cart {
 
   int get countOfItems {
     int total = 0;
-    for (Sandwich sandwich in _items.keys) {
-      total += _items[sandwich]!;
+    for (int quantity in _items.values) {
+      total += quantity;
     }
     return total;
   }
