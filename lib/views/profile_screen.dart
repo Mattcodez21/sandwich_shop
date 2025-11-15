@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_shop/views/drawer_menu.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -28,6 +29,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         title: const Text('Profile'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
+      drawer: const DrawerMenu(currentRoute: '/profile'),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(

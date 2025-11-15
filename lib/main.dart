@@ -17,6 +17,9 @@ class App extends StatelessWidget {
       home: const OrderScreen(maxQuantity: 5),
       onGenerateRoute: (settings) {
         switch (settings.name) {
+          case '/':
+            return MaterialPageRoute(
+                builder: (_) => const OrderScreen(maxQuantity: 5));
           case '/about':
             return MaterialPageRoute(builder: (_) => const AboutScreen());
           case '/profile':
