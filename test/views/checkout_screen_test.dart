@@ -4,6 +4,7 @@ import 'package:sandwich_shop/views/checkout_screen.dart';
 import 'package:sandwich_shop/models/cart.dart';
 import 'package:sandwich_shop/models/sandwich.dart';
 import 'package:sandwich_shop/repositories/pricing_repository.dart';
+import 'package:provider/provider.dart';
 
 void main() {
   testWidgets(
@@ -18,14 +19,21 @@ void main() {
     final Sandwich sandwich2 = Sandwich(
       type: SandwichType.veggieDelight,
       isFootlong: false,
-      breadType: BreadType.brown,
+      breadType: BreadType.white,
     );
 
     // Add items to cart
     cart.add(sandwich1, quantity: 2);
     cart.add(sandwich2, quantity: 1);
 
-    await tester.pumpWidget(MaterialApp(home: CheckoutScreen(cart: cart)));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ChangeNotifierProvider.value(
+          value: cart,
+          child: const CheckoutScreen(),
+        ),
+      ),
+    );
 
     // Check screen title
     expect(find.text('Checkout'), findsOneWidget);
@@ -65,7 +73,14 @@ void main() {
     );
     cart.add(sandwich, quantity: 1);
 
-    await tester.pumpWidget(MaterialApp(home: CheckoutScreen(cart: cart)));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ChangeNotifierProvider.value(
+          value: cart,
+          child: const CheckoutScreen(),
+        ),
+      ),
+    );
 
     // Tap confirm payment button
     await tester.tap(find.text('Confirm Payment'));
@@ -96,16 +111,23 @@ void main() {
     Map? orderConfirmation;
 
     await tester.pumpWidget(MaterialApp(
-      home: Builder(
-        builder: (context) => ElevatedButton(
-          onPressed: () async {
-            final result = await Navigator.push<Map>(
-              context,
-              MaterialPageRoute(builder: (_) => CheckoutScreen(cart: cart)),
-            );
-            orderConfirmation = result;
-          },
-          child: const Text('Go to Checkout'),
+      home: ChangeNotifierProvider.value(
+        value: cart,
+        child: Builder(
+          builder: (context) => ElevatedButton(
+            onPressed: () async {
+              final result = await Navigator.push<Map>(
+                context,
+                MaterialPageRoute(
+                    builder: (_) => ChangeNotifierProvider.value(
+                          value: cart,
+                          child: const CheckoutScreen(),
+                        )),
+              );
+              orderConfirmation = result;
+            },
+            child: const Text('Go to Checkout'),
+          ),
         ),
       ),
     ));
@@ -137,7 +159,14 @@ void main() {
       (WidgetTester tester) async {
     final Cart cart = Cart(); // Empty cart
 
-    await tester.pumpWidget(MaterialApp(home: CheckoutScreen(cart: cart)));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ChangeNotifierProvider.value(
+          value: cart,
+          child: const CheckoutScreen(),
+        ),
+      ),
+    );
 
     // Should still show basic UI elements
     expect(find.text('Checkout'), findsOneWidget);

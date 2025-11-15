@@ -4,13 +4,21 @@ import 'package:sandwich_shop/views/cart_screen.dart';
 import 'package:sandwich_shop/models/cart.dart';
 import 'package:sandwich_shop/models/sandwich.dart';
 import 'package:sandwich_shop/repositories/pricing_repository.dart';
+import 'package:provider/provider.dart';
 
 void main() {
   testWidgets('CartScreen shows empty state when cart has no items',
       (WidgetTester tester) async {
     final Cart cart = Cart();
 
-    await tester.pumpWidget(MaterialApp(home: CartScreen(cart: cart)));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ChangeNotifierProvider.value(
+          value: cart,
+          child: const CartScreen(),
+        ),
+      ),
+    );
 
     // Empty-cart message visible
     expect(find.text('Your cart is empty'), findsOneWidget);
@@ -32,7 +40,14 @@ void main() {
     // Add initial quantity = 2
     cart.add(sandwich, quantity: 2);
 
-    await tester.pumpWidget(MaterialApp(home: CartScreen(cart: cart)));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ChangeNotifierProvider.value(
+          value: cart,
+          child: const CartScreen(),
+        ),
+      ),
+    );
     await tester.pumpAndSettle();
 
     // Verify item name and initial quantity shown
