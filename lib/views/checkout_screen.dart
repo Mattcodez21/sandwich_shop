@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:sandwich_shop/views/app_styles.dart';
 import 'package:sandwich_shop/models/cart.dart';
-import 'package:sandwich_shop/models/sandwich.dart';
-import 'package:sandwich_shop/repositories/pricing_repository.dart';
+import 'package:sandwich_shop/views/common_widgets.dart';
 
 class CheckoutScreen extends StatefulWidget {
   const CheckoutScreen({super.key});
@@ -13,154 +11,158 @@ class CheckoutScreen extends StatefulWidget {
 }
 
 class _CheckoutScreenState extends State<CheckoutScreen> {
-  bool _isProcessing = false;
+  final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _addressController = TextEditingController();
+  final _phoneController = TextEditingController();
 
-  Future<void> _processPayment() async {
-    setState(() {
-      _isProcessing = true;
-    });
-
-    await Future.delayed(const Duration(seconds: 2));
-
-    final DateTime currentTime = DateTime.now();
-    final int timestamp = currentTime.millisecondsSinceEpoch;
-    final String orderId = 'ORD$timestamp';
-
-    final Cart cart = Provider.of<Cart>(context, listen: false);
-    final Map orderConfirmation = {
-      'orderId': orderId,
-      'totalAmount': cart.totalPrice,
-      'itemCount': cart.countOfItems,
-      'estimatedTime': '15-20 minutes',
-    };
-
-    if (mounted) {
-      Navigator.pop(context, orderConfirmation);
-    }
-  }
-
-  double _calculateItemPrice(Sandwich sandwich, int quantity) {
-    PricingRepository repo = PricingRepository();
-    return repo.calculatePrice(
-        quantity: quantity, isFootlong: sandwich.isFootlong);
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _addressController.dispose();
+    _phoneController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: SizedBox(
-            height: 100,
-            child: Image.asset('assets/images/logo.png'),
-          ),
-        ),
-        title: Text('Checkout', style: heading1),
-        actions: [
-          Consumer<Cart>(
-            builder: (context, cart, child) {
-              return Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.shopping_cart),
-                    const SizedBox(width: 4),
-                    Text('${cart.countOfItems}'),
-                  ],
-                ),
-              );
-            },
-          ),
-        ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        child: Consumer<Cart>(
-          builder: (context, cart, child) {
-            List<Widget> columnChildren = [];
-
-            columnChildren.add(Text('Order Summary', style: heading2));
-            columnChildren.add(const SizedBox(height: 20));
-
-            for (MapEntry<Sandwich, int> entry in cart.items.entries) {
-              final Sandwich sandwich = entry.key;
-              final int quantity = entry.value;
-              final double itemPrice = _calculateItemPrice(sandwich, quantity);
-
-              final Widget itemRow = Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return CommonScaffold(
+      title: 'Checkout',
+      body: Consumer<Cart>(
+        builder: (context, cart, child) {
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
                 children: [
-                  Text(
-                    '${quantity}x ${sandwich.name}',
-                    style: normalText,
+                  CommonCard(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Order Summary',
+                          style: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 16),
+                        for (int i = 0; i < cart.items.length; i++)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 4.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text('Sandwich ${cart.items[i]}'),
+                                const Text('\$8.99'),
+                              ],
+                            ),
+                          ),
+                        const Divider(),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text('Total',
+                                style: TextStyle(
+                                    fontSize: 18, fontWeight: FontWeight.bold)),
+                            Text(
+                              '\$${(cart.items.length * 8.99).toStringAsFixed(2)}',
+                              style: const TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                  Text(
-                    '£${itemPrice.toStringAsFixed(2)}',
-                    style: normalText,
+                  const SizedBox(height: 16),
+                  CommonCard(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Delivery Information',
+                          style: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: _nameController,
+                          decoration: const InputDecoration(
+                            labelText: 'Full Name',
+                            border: OutlineInputBorder(),
+                          ),
+                          validator: (value) => value?.isEmpty ?? true
+                              ? 'Please enter your name'
+                              : null,
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: _emailController,
+                          decoration: const InputDecoration(
+                            labelText: 'Email',
+                            border: OutlineInputBorder(),
+                          ),
+                          validator: (value) => value?.isEmpty ?? true
+                              ? 'Please enter your email'
+                              : null,
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: _addressController,
+                          decoration: const InputDecoration(
+                            labelText: 'Delivery Address',
+                            border: OutlineInputBorder(),
+                          ),
+                          maxLines: 3,
+                          validator: (value) => value?.isEmpty ?? true
+                              ? 'Please enter your address'
+                              : null,
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: _phoneController,
+                          decoration: const InputDecoration(
+                            labelText: 'Phone Number',
+                            border: OutlineInputBorder(),
+                          ),
+                          validator: (value) => value?.isEmpty ?? true
+                              ? 'Please enter your phone number'
+                              : null,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  CommonButton(
+                    text: 'Place Order',
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        _placeOrder(context, cart);
+                      }
+                    },
+                    icon: Icons.check_circle,
                   ),
                 ],
-              );
-
-              columnChildren.add(itemRow);
-              columnChildren.add(const SizedBox(height: 8));
-            }
-
-            columnChildren.add(const Divider());
-            columnChildren.add(const SizedBox(height: 10));
-
-            final Widget totalRow = Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('Total:', style: heading2),
-                Text(
-                  '£${cart.totalPrice.toStringAsFixed(2)}',
-                  style: heading2,
-                ),
-              ],
-            );
-            columnChildren.add(totalRow);
-            columnChildren.add(const SizedBox(height: 40));
-
-            columnChildren.add(
-              Text(
-                'Payment Method: Card ending in 1234',
-                style: normalText,
-                textAlign: TextAlign.center,
               ),
-            );
-            columnChildren.add(const SizedBox(height: 20));
-
-            if (_isProcessing) {
-              columnChildren.add(
-                const Center(
-                  child: CircularProgressIndicator(),
-                ),
-              );
-              columnChildren.add(const SizedBox(height: 20));
-              columnChildren.add(
-                Text(
-                  'Processing payment...',
-                  style: normalText,
-                  textAlign: TextAlign.center,
-                ),
-              );
-            } else {
-              columnChildren.add(
-                ElevatedButton(
-                  onPressed: _processPayment,
-                  child: Text('Confirm Payment', style: normalText),
-                ),
-              );
-            }
-
-            return Column(
-              children: columnChildren,
-            );
-          },
-        ),
+            ),
+          );
+        },
       ),
     );
+  }
+
+  void _placeOrder(BuildContext context, Cart cart) {
+    cart.items.clear();
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Order placed successfully!'),
+        backgroundColor: Colors.green,
+      ),
+    );
+
+    Navigator.of(context).popUntil((route) => route.isFirst);
   }
 }

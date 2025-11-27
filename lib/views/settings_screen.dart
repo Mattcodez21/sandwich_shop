@@ -1,93 +1,116 @@
 import 'package:flutter/material.dart';
-import 'package:sandwich_shop/views/app_styles.dart';
+import 'package:sandwich_shop/views/common_widgets.dart';
 
-class SettingsScreen extends StatefulWidget {
+class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
   @override
-  State<SettingsScreen> createState() => _SettingsScreenState();
-}
-
-class _SettingsScreenState extends State<SettingsScreen> {
-  double _fontSize = 16.0;
-  bool _isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadSettings();
-  }
-
-  Future<void> _loadSettings() async {
-    await AppStyles.loadFontSize();
-    setState(() {
-      _fontSize = AppStyles.baseFontSize;
-      _isLoading = false;
-    });
-  }
-
-  Future<void> _saveFontSize(double fontSize) async {
-    await AppStyles.saveFontSize(fontSize);
-    setState(() {
-      _fontSize = fontSize;
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
-    }
-
-    return Scaffold(
-      appBar: AppBar(
-        leading: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: SizedBox(
-            height: 100,
-            child: Image.asset('assets/images/logo.png'),
-          ),
-        ),
-        title: Text('Settings', style: AppStyles.heading1),
-      ),
-      body: Padding(
+    return CommonScaffold(
+      title: 'Settings',
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            Text('Font Size', style: AppStyles.heading2),
-            const SizedBox(height: 20),
-            Text(
-              'Current size: ${_fontSize.toInt()}px',
-              style: TextStyle(fontSize: _fontSize),
+            CommonCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Notifications',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 16),
+                  SwitchListTile(
+                    title: const Text('Push Notifications'),
+                    subtitle: const Text('Receive order updates'),
+                    value: true,
+                    onChanged: (value) {
+                      // ...existing notification logic...
+                    },
+                  ),
+                  SwitchListTile(
+                    title: const Text('Email Notifications'),
+                    subtitle: const Text('Receive promotional emails'),
+                    value: false,
+                    onChanged: (value) {
+                      // ...existing email logic...
+                    },
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 20),
-            Slider(
-              value: _fontSize,
-              min: 12.0,
-              max: 24.0,
-              divisions: 6,
-              label: _fontSize.toInt().toString(),
-              onChanged: _saveFontSize,
+            const SizedBox(height: 16),
+            CommonCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'App Preferences',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 16),
+                  ListTile(
+                    title: const Text('Dark Mode'),
+                    trailing: Switch(
+                      value: false,
+                      onChanged: (value) {
+                        // ...existing dark mode logic...
+                      },
+                    ),
+                  ),
+                  ListTile(
+                    title: const Text('Language'),
+                    subtitle: const Text('English'),
+                    trailing: const Icon(Icons.arrow_forward_ios),
+                    onTap: () {
+                      // ...existing language selection...
+                    },
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 20),
-            Text(
-              'This is sample text to preview the font size.',
-              style: TextStyle(fontSize: _fontSize),
+            const SizedBox(height: 24),
+            CommonButton(
+              text: 'Save Settings',
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Settings saved successfully!'),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+              },
+              icon: Icons.save,
             ),
-            const SizedBox(height: 20),
-            Text(
-              'Font size changes are saved automatically. Restart the app to see changes in all screens.',
-              style: AppStyles.normalText,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text('Back to Order', style: AppStyles.normalText),
+            const SizedBox(height: 8),
+            CommonButton(
+              text: 'Reset to Defaults',
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text('Reset Settings'),
+                    content: const Text(
+                        'Are you sure you want to reset all settings to default?'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('Cancel'),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          // ...existing reset logic...
+                        },
+                        child: const Text('Reset'),
+                      ),
+                    ],
+                  ),
+                );
+              },
+              isOutlined: true,
+              icon: Icons.restore,
             ),
           ],
         ),
