@@ -48,14 +48,15 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                               fontSize: 18, fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 16),
-                        for (int i = 0; i < cart.items.length; i++)
+                        for (final entry in cart.items.entries)
                           Padding(
                             padding: const EdgeInsets.symmetric(vertical: 4.0),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text('Sandwich ${cart.items[i]}'),
-                                const Text('\$8.99'),
+                                Text('${entry.key.name} x${entry.value}'),
+                                Text(
+                                    '£${(8.99 * entry.value).toStringAsFixed(2)}'),
                               ],
                             ),
                           ),
@@ -67,7 +68,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                 style: TextStyle(
                                     fontSize: 18, fontWeight: FontWeight.bold)),
                             Text(
-                              '\$${(cart.items.length * 8.99).toStringAsFixed(2)}',
+                              '£${(cart.items.entries.fold<double>(0, (sum, entry) => sum + (8.99 * entry.value))).toStringAsFixed(2)}',
                               style: const TextStyle(
                                   fontSize: 18, fontWeight: FontWeight.bold),
                             ),
@@ -153,16 +154,55 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     );
   }
 
-  void _placeOrder(BuildContext context, Cart cart) {
-    cart.items.clear();
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Order placed successfully!'),
-        backgroundColor: Colors.green,
+  void _placeOrder(BuildContext context, Cart cart) async {
+    // Show loading indicator
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Dialog(
+        child: Padding(
+          padding: EdgeInsets.all(20.0),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(width: 20),
+              Text('Processing payment...'),
+            ],
+          ),
+        ),
       ),
     );
 
-    Navigator.of(context).popUntil((route) => route.isFirst);
+    // Simulate payment processing delay
+    await Future.delayed(const Duration(seconds: 2));
+
+    // Close loading dialog
+    Navigator.pop(context);
+
+    // Show payment accepted dialog immediately
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        icon: const Icon(Icons.check_circle, color: Colors.green, size: 50),
+        title: const Text('Payment Accepted!'),
+        content: const Text('Your order has been placed successfully.'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context); // Close this dialog
+            },
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+
+    // Clear cart after user acknowledges success
+    cart.items.clear();
+
+    // Navigate back to main screen
+    Navigator.popUntil(context, (route) => route.isFirst);
   }
 }

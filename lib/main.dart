@@ -22,7 +22,7 @@ class App extends StatelessWidget {
       child: const MaterialApp(
         title: 'Sandwich Shop App',
         debugShowCheckedModeBanner: false,
-        home: OrderScreen(maxQuantity: 5),
+        home: OrderScreen(),
       ),
     );
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_shop/views/about_screen.dart';
 
 class DrawerMenu extends StatelessWidget {
   final String currentRoute;
@@ -76,9 +77,12 @@ class DrawerMenu extends StatelessWidget {
             selected: currentRoute == '/about',
             onTap: () {
               Navigator.pop(context);
-              if (currentRoute != '/about') {
-                Navigator.pushReplacementNamed(context, '/about');
-              }
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AboutScreen(),
+                ),
+              );
             },
           ),
         ],
