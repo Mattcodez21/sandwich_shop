@@ -408,5 +408,57 @@ void main() {
           reason:
               'Did not detect settings screen (no settings title) and main UI still visible after tapping opener.');
     });
+
+    // ...existing code...
+    testWidgets('multiple items in cart - adding different sandwiches',
+        (WidgetTester tester) async {
+      app.main();
+      await tester.pumpAndSettle();
+
+      // Add default sandwich (assumes Veggie Delight is the default shown)
+      final addToCartButton = find.text('Add to Cart');
+      await tester.ensureVisible(addToCartButton);
+      await tester.tap(addToCartButton, warnIfMissed: false);
+      await tester.pumpAndSettle();
+
+      // Change sandwich type to a different one (try dropdown first, then on-screen fallback)
+      final sandwichDropdown = find.byType(DropdownMenu<SandwichType>);
+      if (sandwichDropdown.evaluate().isNotEmpty) {
+        await tester.tap(sandwichDropdown.first, warnIfMissed: false);
+        await tester.pumpAndSettle();
+
+        final chickenFinder =
+            find.text('Chicken Teriyaki', skipOffstage: false);
+        if (chickenFinder.evaluate().isNotEmpty) {
+          await tester.tap(chickenFinder.last, warnIfMissed: false);
+          await tester.pumpAndSettle();
+        }
+      } else {
+        final chickenOnScreen = find.text('Chicken Teriyaki');
+        if (chickenOnScreen.evaluate().isNotEmpty) {
+          await tester.tap(chickenOnScreen.last, warnIfMissed: false);
+          await tester.pumpAndSettle();
+        }
+      }
+
+      // Add the second sandwich
+      await tester.ensureVisible(addToCartButton);
+      await tester.tap(addToCartButton, warnIfMissed: false);
+      await tester.pumpAndSettle();
+
+      // Verify cart summary shows two items
+      expect(find.textContaining('Cart: 2 items'), findsOneWidget);
+
+      // Open cart and verify both items are present
+      final viewCartButton = find.text('View Cart');
+      await tester.ensureVisible(viewCartButton);
+      await tester.tap(viewCartButton, warnIfMissed: false);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Shopping Cart'), findsOneWidget);
+      expect(find.text('Veggie Delight'), findsOneWidget);
+      expect(find.text('Chicken Teriyaki'), findsOneWidget);
+    });
+// ...existing code...
   });
 }
