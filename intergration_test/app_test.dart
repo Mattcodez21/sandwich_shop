@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:sandwich_shop/main.dart' as app;
 import 'package:sandwich_shop/models/sandwich.dart';
-import 'package:sandwich_shop/widgets/common_widgets.dart';
+import 'package:sandwich_shop/views/common_widgets.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -19,7 +19,7 @@ void main() {
       expect(find.text('Cart: 0 items - £0.00'), findsOneWidget);
       expect(find.text('Veggie Delight'), findsWidgets);
 
-      final addToCartButton = find.widgetWithText(StyledButton, 'Add to Cart');
+      final addToCartButton = find.widgetWithText(CommonButton, 'Add to Cart');
       await tester.ensureVisible(addToCartButton); // Scroll if needed
       await tester.pumpAndSettle();
 
@@ -31,7 +31,7 @@ void main() {
       expect(find.text('Cart: 1 items - £11.00'), findsOneWidget);
 
       // Find the View Cart button to navigate to the cart
-      final viewCartButton = find.widgetWithText(StyledButton, 'View Cart');
+      final viewCartButton = find.widgetWithText(CommonButton, 'View Cart');
       await tester.ensureVisible(viewCartButton);
       await tester.pumpAndSettle();
       await tester.tap(viewCartButton);
@@ -55,14 +55,14 @@ void main() {
       await tester.tap(find.text('Chicken Teriyaki').last);
       await tester.pumpAndSettle();
 
-      final addToCartButton = find.widgetWithText(StyledButton, 'Add to Cart');
+      final addToCartButton = find.widgetWithText(CommonButton, 'Add to Cart');
       await tester.ensureVisible(addToCartButton);
       await tester.pumpAndSettle();
 
       await tester.tap(addToCartButton);
       await tester.pumpAndSettle();
 
-      final viewCartButton = find.widgetWithText(StyledButton, 'View Cart');
+      final viewCartButton = find.widgetWithText(CommonButton, 'View Cart');
       await tester.ensureVisible(viewCartButton);
       await tester.pumpAndSettle();
 
@@ -92,7 +92,7 @@ void main() {
 
       expect(find.text('3'), findsOneWidget);
 
-      final addToCartButton = find.widgetWithText(StyledButton, 'Add to Cart');
+      final addToCartButton = find.widgetWithText(CommonButton, 'Add to Cart');
       await tester.ensureVisible(addToCartButton);
       await tester.pumpAndSettle();
 
@@ -106,17 +106,17 @@ void main() {
       app.main();
       await tester.pumpAndSettle();
 
-      final addToCartButton = find.widgetWithText(StyledButton, 'Add to Cart');
+      final addToCartButton = find.widgetWithText(CommonButton, 'Add to Cart');
       await tester.ensureVisible(addToCartButton);
       await tester.tap(addToCartButton);
       await tester.pumpAndSettle();
 
-      final viewCartButton = find.widgetWithText(StyledButton, 'View Cart');
+      final viewCartButton = find.widgetWithText(CommonButton, 'View Cart');
       await tester.ensureVisible(viewCartButton);
       await tester.tap(viewCartButton);
       await tester.pumpAndSettle();
 
-      final checkoutButton = find.widgetWithText(StyledButton, 'Checkout');
+      final checkoutButton = find.widgetWithText(CommonButton, 'Checkout');
       await tester.tap(checkoutButton);
       await tester.pumpAndSettle();
 
