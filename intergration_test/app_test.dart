@@ -118,5 +118,33 @@ void main() {
       expect(find.text('Shopping Cart'), findsOneWidget);
       expect(find.textContaining('Total:'), findsOneWidget);
     });
+
+    testWidgets('remove item from cart', (WidgetTester tester) async {
+      app.main();
+      await tester.pumpAndSettle();
+
+      // Add item to cart first
+      final addToCartButton = find.text('Add to Cart');
+      await tester.ensureVisible(addToCartButton);
+      await tester.tap(addToCartButton);
+      await tester.pumpAndSettle();
+
+      // Verify item was added
+      expect(find.text('Cart: 1 items - £11.00'), findsOneWidget);
+
+      // Go to cart
+      final viewCartButton = find.text('View Cart');
+      await tester.ensureVisible(viewCartButton);
+      await tester.tap(viewCartButton);
+      await tester.pumpAndSettle();
+
+      // Find and tap the remove button (red circle icon)
+      final removeButton = find.byIcon(Icons.remove_circle);
+      await tester.tap(removeButton);
+      await tester.pumpAndSettle();
+
+      // Verify cart is now empty
+      expect(find.text('Your cart is empty'), findsOneWidget);
+    });
   });
 }
