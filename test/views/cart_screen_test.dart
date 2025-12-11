@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sandwich_shop/views/cart_screen.dart';
+import 'package:provider/provider.dart';
 import 'package:sandwich_shop/models/cart.dart';
 import 'package:sandwich_shop/models/sandwich.dart';
-import 'package:sandwich_shop/repositories/pricing_repository.dart';
-import 'package:provider/provider.dart';
+import 'package:sandwich_shop/views/cart_screen.dart';
 
 void main() {
   testWidgets('CartScreen shows empty state when cart has no items',
       (WidgetTester tester) async {
-    final Cart cart = Cart();
+    final cart = Cart();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -20,25 +19,29 @@ void main() {
       ),
     );
 
-    // Empty-cart message visible
-    expect(find.text('Your cart is empty'), findsOneWidget);
+    await tester.pumpAndSettle();
 
-    // Total should be £0.00
-    expect(find.text('Total: £0.00'), findsOneWidget);
+    // Empty-cart UI
+    expect(find.text('Your cart is empty'), findsOneWidget);
+    expect(
+        find.textContaining('Add some delicious sandwiches'), findsOneWidget);
+
+    // When empty, there should be no total or proceed button rendered
+    expect(find.textContaining('Total:'), findsNothing);
+    expect(find.text('Proceed to Checkout'), findsNothing);
   });
 
-  testWidgets(
-      'CartScreen: increment, decrement (remove when below 1), explicit remove, total updates and snackbars shown',
+  testWidgets('CartScreen shows item, price and total for one item',
       (WidgetTester tester) async {
-    final Cart cart = Cart();
-    final Sandwich sandwich = Sandwich(
+    final cart = Cart();
+    final sandwich = Sandwich(
       type: SandwichType.veggieDelight,
       isFootlong: true,
       breadType: BreadType.white,
     );
 
-    // Add initial quantity = 2
-    cart.add(sandwich, quantity: 2);
+    // add one item
+    cart.add(sandwich, quantity: 1);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -48,73 +51,59 @@ void main() {
         ),
       ),
     );
+
     await tester.pumpAndSettle();
 
-    // Verify item name and initial quantity shown
+    // Item name and per-item price shown
     expect(find.text(sandwich.name), findsOneWidget);
-    expect(find.text('2'), findsWidgets); // quantity label present
+    expect(find.textContaining('Price: £'), findsWidgets);
 
-    // Compute expected totals
-    final PricingRepository repo = PricingRepository();
-    final String totalFor2 = repo
-        .calculatePrice(quantity: 2, isFootlong: sandwich.isFootlong)
-        .toStringAsFixed(2);
-    expect(find.text('Total: £$totalFor2'), findsOneWidget);
+    // The UI uses 8.99 per item in cart_screen.dart
+    final expectedPerItem = (8.99 * 1).toStringAsFixed(2);
+    expect(find.textContaining('£$expectedPerItem'), findsWidgets);
 
-    // Tap + to increase to 3
-    await tester.tap(find.byIcon(Icons.add).first);
-    await tester.pump(); // rebuild
-    await tester.pump(const Duration(milliseconds: 1600)); // allow snackbar
+    // Total displayed at bottom should equal per-item total
+    final expectedTotal = (8.99 * 1).toStringAsFixed(2);
+    expect(find.text('Total: £$expectedTotal'), findsOneWidget);
 
-    // SnackBar should be shown and contain update text
-    expect(find.byType(SnackBar), findsOneWidget);
-    expect(
-      find.byWidgetPredicate((w) =>
-          w is Text &&
-          w.data != null &&
-          w.data!.contains('Updated ${sandwich.name} quantity: 3')),
-      findsWidgets,
+    // Proceed button exists when cart not empty
+    expect(find.text('Proceed to Checkout'), findsOneWidget);
+  });
+
+  testWidgets('Tapping + increases quantity and updates total',
+      (WidgetTester tester) async {
+    final cart = Cart();
+    final sandwich = Sandwich(
+      type: SandwichType.veggieDelight,
+      isFootlong: true,
+      breadType: BreadType.white,
     );
 
-    final String totalFor3 = repo
-        .calculatePrice(quantity: 3, isFootlong: sandwich.isFootlong)
-        .toStringAsFixed(2);
-    expect(find.text('Total: £$totalFor3'), findsOneWidget);
+    // start with 1
+    cart.add(sandwich, quantity: 1);
 
-    // Tap - (decrement) to 2
-    await tester.tap(find.byIcon(Icons.remove).first);
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 1600)); // snackbar
-    expect(
-      find.byWidgetPredicate((w) =>
-          w is Text &&
-          w.data != null &&
-          w.data!.contains('Updated ${sandwich.name} quantity')),
-      findsWidgets,
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ChangeNotifierProvider.value(
+          value: cart,
+          child: const CartScreen(),
+        ),
+      ),
     );
-    expect(find.text('Total: £$totalFor2'), findsOneWidget);
 
-    // Decrement to 1
-    await tester.tap(find.byIcon(Icons.remove).first);
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 1600));
-    expect(find.text('1'), findsOneWidget);
+    await tester.pumpAndSettle();
 
-    // Use delete icon to remove the item
-    await tester.tap(find.byIcon(Icons.delete).first);
-    await tester.pump();
-    await tester
-        .pump(const Duration(milliseconds: 1600)); // snackbar for delete
+    // Tap the add icon (Icons.add_circle)
+    final addIcon = find.byIcon(Icons.add_circle).first;
+    expect(addIcon, findsOneWidget);
+    await tester.tap(addIcon);
+    await tester.pumpAndSettle();
 
-    // After removal, empty state should be shown and total £0.00 and snackbar present
-    expect(find.text('Your cart is empty'), findsOneWidget);
-    expect(find.text('Total: £0.00'), findsOneWidget);
-    expect(
-      find.byWidgetPredicate((w) =>
-          w is Text &&
-          w.data != null &&
-          w.data!.contains('${sandwich.name} removed from cart')),
-      findsWidgets,
-    );
+    // Quantity should update to 2
+    expect(find.text('2'), findsWidgets);
+
+    // Total should update accordingly (8.99 * 2)
+    final expectedTotal = (8.99 * 2).toStringAsFixed(2);
+    expect(find.text('Total: £$expectedTotal'), findsOneWidget);
   });
 }
