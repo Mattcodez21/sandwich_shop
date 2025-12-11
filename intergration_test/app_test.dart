@@ -146,5 +146,43 @@ void main() {
       // Verify cart is now empty
       expect(find.text('Your cart is empty'), findsOneWidget);
     });
+
+    testWidgets('toggle sandwich size and add to cart',
+        (WidgetTester tester) async {
+      app.main();
+      await tester.pumpAndSettle();
+
+      // Find the switch widget for size toggle
+      final sizeSwitch = find.byType(Switch);
+      expect(sizeSwitch, findsOneWidget);
+
+      // Initially should be footlong (switch is on)
+      Switch switchWidget = tester.widget(sizeSwitch);
+      expect(switchWidget.value, true);
+
+      // Toggle to six-inch
+      await tester.tap(sizeSwitch);
+      await tester.pumpAndSettle();
+
+      // Verify switch is now off (six-inch)
+      switchWidget = tester.widget(sizeSwitch);
+      expect(switchWidget.value, false);
+
+      // Add to cart
+      final addToCartButton = find.text('Add to Cart');
+      await tester.tap(addToCartButton);
+      await tester.pumpAndSettle();
+
+      // Verify item was added (check that cart count increased)
+      expect(find.textContaining('Cart: 1 items'), findsOneWidget);
+
+      // Go to cart and verify the sandwich is there
+      final viewCartButton = find.text('View Cart');
+      await tester.tap(viewCartButton);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Shopping Cart'), findsOneWidget);
+      expect(find.text('Veggie Delight'), findsOneWidget);
+    });
   });
 }
