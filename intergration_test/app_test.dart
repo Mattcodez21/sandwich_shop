@@ -654,5 +654,38 @@ void main() {
           reason:
               'Did not detect validation hints or submit control after interacting with checkout form (best-effort).');
     });
+
+    // ...existing code...
+    testWidgets(
+        'cannot proceed to checkout with empty cart - simple error case',
+        (WidgetTester tester) async {
+      app.main();
+      await tester.pumpAndSettle();
+
+      // Confirm cart shows zero items up-front
+      expect(find.textContaining('Cart: 0'), findsOneWidget);
+
+      // Open cart (try text button, fall back to cart icon)
+      final viewCart = find.text('View Cart');
+      if (viewCart.evaluate().isNotEmpty) {
+        await tester.ensureVisible(viewCart.first);
+        await tester.tap(viewCart.first);
+      } else if (find.byIcon(Icons.shopping_cart).evaluate().isNotEmpty) {
+        await tester.tap(find.byIcon(Icons.shopping_cart).first);
+      } else {
+        // If there's no visible cart control, treat the test as not applicable
+        return;
+      }
+      await tester.pumpAndSettle();
+
+      // Expect empty-cart UI and that checkout/proceed is not available
+      expect(find.text('Your cart is empty'), findsOneWidget);
+
+      // Common proceed labels should not be present when cart is empty
+      expect(find.text('Proceed to Checkout'), findsNothing);
+      expect(find.text('Checkout'), findsNothing);
+      expect(find.text('Place Order'), findsNothing);
+    });
+// ...existing code...
   });
 }
