@@ -154,12 +154,18 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     );
   }
 
+  // ...existing code...
+  // ...existing code...
   void _placeOrder(BuildContext context, Cart cart) async {
-    // Show loading indicator
+    // capture useful objects before any await
+    final navigator = Navigator.of(context);
+    ScaffoldMessenger.of(context);
+
+    // show the loading dialog using the current context (before awaiting)
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => const Dialog(
+      builder: (_) => const Dialog(
         child: Padding(
           padding: EdgeInsets.all(20.0),
           child: Row(
@@ -174,35 +180,44 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       ),
     );
 
-    // Simulate payment processing delay
+    // long-running async work
     await Future.delayed(const Duration(seconds: 2));
 
-    // Close loading dialog
-    Navigator.pop(context);
+    // don't use 'context' after await; use captured objects and still check mounted
+    if (!mounted) return;
 
-    // Show payment accepted dialog immediately
+    // close loading dialog
+    navigator.pop();
+
+    if (!mounted) return;
+
+    // show success by using the captured navigator (or scaffoldMessenger)
     await showDialog(
-      context: context,
+      context: navigator.context,
       barrierDismissible: false,
-      builder: (context) => AlertDialog(
+      builder: (_) => AlertDialog(
         icon: const Icon(Icons.check_circle, color: Colors.green, size: 50),
         title: const Text('Payment Accepted!'),
         content: const Text('Your order has been placed successfully.'),
         actions: [
           TextButton(
-            onPressed: () {
-              Navigator.pop(context); // Close this dialog
-            },
+            onPressed: () => navigator.pop(),
             child: const Text('OK'),
           ),
         ],
       ),
     );
 
-    // Clear cart after user acknowledges success
-    cart.items.clear();
+    if (!mounted) return;
 
-    // Navigate back to main screen
-    Navigator.popUntil(context, (route) => route.isFirst);
+    // clear via Cart API
+    try {
+      cart.clear();
+    } catch (_) {}
+
+    if (mounted) {
+      navigator.popUntil((route) => route.isFirst);
+    }
   }
+// ...existing code...
 }
