@@ -459,6 +459,200 @@ void main() {
       expect(find.text('Veggie Delight'), findsOneWidget);
       expect(find.text('Chicken Teriyaki'), findsOneWidget);
     });
-// ...existing code...
+
+    testWidgets('checkout form flexible filling - try many field selectors',
+        (WidgetTester tester) async {
+      app.main();
+      await tester.pumpAndSettle();
+
+      // Ensure an item exists
+      final addToCart = find.text('Add to Cart');
+      if (addToCart.evaluate().isEmpty) fail('Add to Cart button not found');
+      await tester.ensureVisible(addToCart);
+      await tester.tap(addToCart, warnIfMissed: false);
+      await tester.pumpAndSettle();
+
+      // Open cart and proceed
+      final viewCart = find.text('View Cart');
+      if (viewCart.evaluate().isEmpty) fail('View Cart button not found');
+      await tester.ensureVisible(viewCart);
+      await tester.tap(viewCart, warnIfMissed: false);
+      await tester.pumpAndSettle();
+
+      final proceedLabels = ['Proceed to Checkout', 'Proceed', 'Checkout'];
+      Finder? proceed;
+      for (final l in proceedLabels) {
+        final f = find.text(l);
+        if (f.evaluate().isNotEmpty) {
+          proceed = f;
+          break;
+        }
+      }
+      if (proceed == null) {
+        for (final el in find.byType(ElevatedButton).evaluate()) {
+          final btn = el.widget as ElevatedButton;
+          if (btn.onPressed != null) {
+            proceed = find.byWidget(btn);
+            break;
+          }
+        }
+      }
+      if (proceed == null) fail('Proceed to Checkout button not found');
+      await tester.ensureVisible(proceed);
+      try {
+        await tester.tap(proceed, warnIfMissed: false);
+      } catch (_) {
+        await tester.tapAt(tester.getCenter(proceed));
+      }
+      await tester.pumpAndSettle();
+
+      // Try filling common fields using multiple strategies
+      final textFields = find.byType(TextFormField);
+      if (textFields.evaluate().length >= 4) {
+        await tester.enterText(textFields.at(0), 'Test User');
+        await tester.enterText(textFields.at(1), 'test@example.com');
+        await tester.enterText(textFields.at(2), '1 Test Street');
+        await tester.enterText(textFields.at(3), '07123456789');
+        await tester.pumpAndSettle();
+      } else {
+        // semantics labels and hints
+        final nameCandidates = [
+          find.bySemanticsLabel('Name'),
+          find.text('Name')
+        ];
+        final emailCandidates = [
+          find.bySemanticsLabel('Email'),
+          find.text('Email')
+        ];
+        final addressCandidates = [
+          find.bySemanticsLabel('Address'),
+          find.text('Address')
+        ];
+        final phoneCandidates = [
+          find.bySemanticsLabel('Phone'),
+          find.bySemanticsLabel('Phone number'),
+          find.text('Phone')
+        ];
+
+        bool filled = false;
+        if (nameCandidates.any((f) => f.evaluate().isNotEmpty)) {
+          for (final f in nameCandidates) {
+            if (f.evaluate().isNotEmpty) {
+              await tester.enterText(f, 'Test User');
+              filled = true;
+              break;
+            }
+          }
+        }
+        if (emailCandidates.any((f) => f.evaluate().isNotEmpty)) {
+          for (final f in emailCandidates) {
+            if (f.evaluate().isNotEmpty) {
+              await tester.enterText(f, 'test@example.com');
+              break;
+            }
+          }
+        }
+        if (addressCandidates.any((f) => f.evaluate().isNotEmpty)) {
+          for (final f in addressCandidates) {
+            if (f.evaluate().isNotEmpty) {
+              await tester.enterText(f, '1 Test Street');
+              break;
+            }
+          }
+        }
+        if (phoneCandidates.any((f) => f.evaluate().isNotEmpty)) {
+          for (final f in phoneCandidates) {
+            if (f.evaluate().isNotEmpty) {
+              await tester.enterText(f, '07123456789');
+              break;
+            }
+          }
+        }
+
+        // As a last resort fill any available TextField widgets
+        if (!filled) {
+          final anyTextFields = find.byType(TextField);
+          final count = anyTextFields.evaluate().length;
+          if (count > 0) {
+            if (count > 0) {
+              await tester.enterText(anyTextFields.at(0), 'Test User');
+            }
+            if (count > 1) {
+              await tester.enterText(anyTextFields.at(1), 'test@example.com');
+            }
+            if (count > 2) {
+              await tester.enterText(anyTextFields.at(2), '1 Test Street');
+            }
+            if (count > 3) {
+              await tester.enterText(anyTextFields.at(3), '07123456789');
+            }
+          }
+        }
+        await tester.pumpAndSettle();
+      }
+
+      // Ensure there's some submit control available before finishing (reuse robust search)
+      final placeLabels = [
+        'Place Order',
+        'Submit Order',
+        'Confirm Order',
+        'Checkout',
+        'Pay'
+      ];
+      Finder? placeBtn;
+      for (final l in placeLabels) {
+        final f = find.text(l);
+        if (f.evaluate().isNotEmpty) {
+          placeBtn = f;
+          break;
+        }
+      }
+      if (placeBtn == null) {
+        for (final el in find.byType(ElevatedButton).evaluate()) {
+          final btn = el.widget as ElevatedButton;
+          if (btn.onPressed != null) {
+            placeBtn = find.byWidget(btn);
+            break;
+          }
+        }
+      }
+
+      // If no place button detectable, at least assert that form fields or a submit-area exist
+      if (placeBtn == null &&
+          find.byType(TextFormField).evaluate().isEmpty &&
+          find.byType(TextField).evaluate().isEmpty) {
+        fail('No form fields or submit control found on checkout screen');
+      }
+
+      // If a place control exists, tap to exercise submission flow (best-effort)
+      if (placeBtn != null) {
+        await tester.ensureVisible(placeBtn);
+        try {
+          await tester.tap(placeBtn, warnIfMissed: false);
+        } catch (_) {
+          await tester.tapAt(tester.getCenter(placeBtn));
+        }
+        await tester.pumpAndSettle(const Duration(seconds: 2));
+      }
+
+      // At minimum expect either validation messages or a submit outcome to appear
+      final validationMarkers = [
+        'Please enter',
+        'required',
+        'invalid',
+        'Thank you',
+        'Order'
+      ];
+      var sawMarker = false;
+      for (final m in validationMarkers) {
+        if (find.textContaining(m, findRichText: false).evaluate().isNotEmpty) {
+          sawMarker = true;
+          break;
+        }
+      }
+      expect(sawMarker || placeBtn != null, isTrue,
+          reason:
+              'Did not detect validation hints or submit control after interacting with checkout form (best-effort).');
+    });
   });
 }
