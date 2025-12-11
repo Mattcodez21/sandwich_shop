@@ -184,5 +184,36 @@ void main() {
       expect(find.text('Shopping Cart'), findsOneWidget);
       expect(find.text('Veggie Delight'), findsOneWidget);
     });
+
+    // ...existing code...
+    testWidgets('empty cart scenario - navigate to cart with no items',
+        (WidgetTester tester) async {
+      app.main();
+      await tester.pumpAndSettle();
+
+      // Verify initial cart summary shows zero
+      expect(find.text('Cart: 0 items - £0.00'), findsOneWidget);
+
+      // Navigate to cart
+      final viewCartButton = find.text('View Cart');
+      await tester.ensureVisible(viewCartButton);
+      await tester.tap(viewCartButton);
+      await tester.pumpAndSettle();
+
+      // Verify cart screen shows empty state
+      expect(find.text('Shopping Cart'), findsOneWidget);
+      expect(find.text('Your cart is empty'), findsOneWidget);
+
+      // Ensure no sandwich items are shown in the empty cart
+      expect(find.text('Veggie Delight'), findsNothing);
+
+      // If a Checkout button exists, ensure it's disabled when cart is empty
+      final checkoutBtnFinder = find.widgetWithText(ElevatedButton, 'Checkout');
+      if (checkoutBtnFinder.evaluate().isNotEmpty) {
+        final elevated = tester.widget<ElevatedButton>(checkoutBtnFinder);
+        expect(elevated.onPressed, isNull);
+      }
+    });
+// ...existing code...
   });
 }
